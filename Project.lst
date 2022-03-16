@@ -1,11 +1,12 @@
-Microsoft (R) Macro Assembler Version 14.30.30706.0	    02/23/22 09:37:10
-)Subtract, Version 2         (AddSub2.asm		     Page 1 - 1
+Microsoft (R) Macro Assembler Version 14.30.30706.0	    03/16/22 09:26:21
+)Subtract, Version 2         (Reverse.asm		     Page 1 - 1
 
 
-				TITLE Subtract, Version 2         (AddSub2.asm)
+				TITLE Subtract, Version 2         (Reverse.asm)
 
-				; This program subtracts 3 32-bit integers
-				; and stores the difference in a variable.
+				; Title:Reverse a string with loop
+				; Subject:System Engineering
+				; Author:Sikako
 
 				INCLUDE Irvine32.inc
 			      C ; Include file for Irvine32.lib             (Irvine32.inc)
@@ -26,48 +27,59 @@ Microsoft (R) Macro Assembler Version 14.30.30706.0	    02/23/22 09:37:10
 			      C .LIST
 			      C 
 
+				.386
+				.model flat,stdcall
+Reverse.asm(10) : warning A4011:multiple .MODEL directives found : .MODEL ignored
+				.stack 4096
+				    ExitProcess PROTO,dwExitCode:DWORD
+
  00000000			.data
 
- 00000000  0000001E [			FIBNum    DWORD 30 DUP(0)
-	    00000000
+ 00000000 54 68 69 73 20		Source BYTE "This is the source string",0
+	   69 73 20 74 68
+	   65 20 73 6F 75
+	   72 63 65 20 73
+	   74 72 69 6E 67
+	   00
+ 0000001A  0000001A [			Target BYTE SIZEOF source DUP('#')
+	    23
 	   ]
 
 
  00000000			.code
- 00000000			main PROC
+ 00000000				main PROC
+ 00000000  B9 0000001A				mov  ecx, SIZEOF Source
+ 00000005  BE 00000000 R			mov  esi, OFFSET Source
+						
+					; store strings in stack
 
- 00000000  C7 05 00000000 R		mov  FIBNum, 1
-	   00000001
- 0000000A  C7 05 00000004 R		mov  FIBNum+4, 1
-	   00000001
- 00000014  B9 0000001C			mov  ecx, 28
- 00000019  BB 00000000			mov  ebx, 0
- 0000001E  BE 00000000			mov  esi, 0
+ 0000000A				L1:
+ 0000000A  8B 06				mov  eax, [esi]
+ 0000000C  50					push eax					; push into stack
+ 0000000D  46					inc  esi					
+ 0000000E  E2 FA				loop L1
 
- 00000023  B8 00000001			mov  eax, 1
- 00000028  E8 00000000 E		call WriteInt
- 0000002D  E8 00000000 E		call CRLF
- 00000032  E8 00000000 E		call WriteInt
- 00000037  E8 00000000 E		call CRLF
+ 00000010  B9 0000001A				mov ecx, SiZEOF Target
+ 00000015  BE 0000001A R			mov esi, OFFSET Target		; point to Target
 
- 0000003C			L1:
- 0000003C  03 9E 00000004 R		add  ebx, [FIBNum + 4 + esi]
- 00000042  03 9E 00000000 R		add  ebx, [FIBNum + esi]
- 00000048  89 9E 00000008 R		mov  FIBNum[8 + esi], ebx
- 0000004E  8B C3			mov  eax, ebx
- 00000050  E8 00000000 E		call WriteInt 					; print out
- 00000055  E8 00000000 E		call CRLF						; \n
- 0000005A  33 DB			xor  ebx, ebx
- 0000005C  83 C6 04			add  esi, 4
- 0000005F  E2 DB			loop L1
+					; pop strings reversely
 
-					exit
- 00000061  6A 00	   *	    push   +000000000h
- 00000063  E8 00000000 E   *	    call   ExitProcess
- 00000068			main ENDP
-				END main
-Microsoft (R) Macro Assembler Version 14.30.30706.0	    02/23/22 09:37:10
-)Subtract, Version 2         (AddSub2.asm		     Symbols 2 - 1
+ 0000001A				L2:
+ 0000001A  58					pop eax
+ 0000001B  88 06				mov [esi], al
+ 0000001D  E8 00000000 E			call WriteChar
+ 00000022  46					inc esi
+ 00000023  E2 F5				loop L2
+
+
+
+						exit
+ 00000025  6A 00	   *	    push   +000000000h
+ 00000027  E8 00000000 E   *	    call   ExitProcess
+ 0000002C				main ENDP
+					END main
+Microsoft (R) Macro Assembler Version 14.30.30706.0	    03/16/22 09:26:21
+)Subtract, Version 2         (Reverse.asm		     Symbols 2 - 1
 
 
 
@@ -160,8 +172,8 @@ Segments and Groups:
 
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 Para	  Stack	  'STACK'	 
-_DATA  . . . . . . . . . . . . .	32 Bit	 00000078 Para	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 00000068 Para	  Public  'CODE'	
+_DATA  . . . . . . . . . . . . .	32 Bit	 00000034 Para	  Public  'DATA'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 0000002C Para	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
@@ -268,8 +280,9 @@ WriteStackFrame  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 WriteString  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteToFile  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteWindowsMsg  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 00000068 Public STDCALL
-  L1 . . . . . . . . . . . . . .	L Near	 0000003C _TEXT	
+main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 0000002C Public STDCALL
+  L1 . . . . . . . . . . . . . .	L Near	 0000000A _TEXT	
+  L2 . . . . . . . . . . . . . .	L Near	 0000001A _TEXT	
 printf . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
 scanf  . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
 wsprintfA  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
@@ -304,7 +317,6 @@ ENABLE_WINDOW_INPUT  . . . . . .	Number	 00000008h
 ENABLE_WRAP_AT_EOL_OUTPUT  . . .	Number	 00000002h   
 ENHANCED_KEY . . . . . . . . . .	Number	 00000100h   
 FALSE  . . . . . . . . . . . . .	Number	 00000000h   
-FIBNum . . . . . . . . . . . . .	DWord	 00000000 _DATA	
 FILE_APPEND_DATA . . . . . . . .	Number	 00000004h   
 FILE_ATTRIBUTE_ARCHIVE . . . . .	Number	 00000020h   
 FILE_ATTRIBUTE_COMPRESSED  . . .	Number	 00000800h   
@@ -405,9 +417,11 @@ STD_ERROR_HANDLE . . . . . . . .	Number	 -0000000Ch
 STD_INPUT_HANDLE . . . . . . . .	Number	 -0000000Ah   
 STD_OUTPUT_HANDLE  . . . . . . .	Number	 -0000000Bh   
 SetConsoleTitle  . . . . . . . .	Text   	 SetConsoleTitleA
+Source . . . . . . . . . . . . .	Byte	 00000000 _DATA	
 TAB  . . . . . . . . . . . . . .	Number	 00000009h   
 TRUE . . . . . . . . . . . . . .	Number	 00000001h   
 TRUNCATE_EXISTING  . . . . . . .	Number	 00000005h   
+Target . . . . . . . . . . . . .	Byte	 0000001A _DATA	
 VK_11  . . . . . . . . . . . . .	Number	 000000BDh   
 VK_12  . . . . . . . . . . . . .	Number	 000000BBh   
 VK_ADD . . . . . . . . . . . . .	Number	 0000006Bh   
@@ -508,5 +522,5 @@ white  . . . . . . . . . . . . .	Number	 0000000Fh
 wsprintf . . . . . . . . . . . .	Text   	 wsprintfA
 yellow . . . . . . . . . . . . .	Number	 0000000Eh   
 
-	   0 Warnings
+	   1 Warnings
 	   0 Errors
